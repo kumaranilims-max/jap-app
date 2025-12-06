@@ -1,0 +1,386 @@
+"use client";
+import { useState, useEffect } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
+import Link from "next/link";
+import { translations, Language } from "@/lib/translations";
+
+export default function CounterPage() {
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const mantraName = searchParams.get("name") || "मंत्र";
+  const mantraId = searchParams.get("id") || "1";
+
+  const [count, setCount] = useState(0);
+  const [goal, setGoal] = useState(108);
+  const [sessionStart, setSessionStart] = useState<Date | null>(null);
+  const [sessions, setSessions] = useState<any[]>([]);
+  const [showGoalModal, setShowGoalModal] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [showCelebration, setShowCelebration] = useState(false);
+  const [language, setLanguage] = useState<Language>('hi');
+
+  const loadTodaySessions = async () => {
+    try {
+      const userId = localStorage.getItem('userId') || 'guest';
+      const today = new Date().toISOString().split('T')[0];
+      
+      // Direct Supabase query
+      const { supabase } = await import('@/lib/supabase');
+      const { data, error } = await supabase
+        .from('mantra_sessions')
+        .select('*')
+        .eq('user_id', userId)
+        .eq('mantra_id', mantraId)
+        .eq('session_date', today)
+        .order('created_at', { ascending: false });
+      
+      if (error) {
+        console.error('Load sessions error:', error);
+      } else if (data) {
+        setSessions(data);
+      }
+    } catch (err) {
+      console.error('Load sessions error:', err);
+    }
+  };
+
+  useEffect(() => {
+    const userId = localStorage.getItem('userId');
+    const savedLang = localStorage.getItem('language') as Language;
+    if (!userId) {
+      window.location.href = '/login';
+      return;
+    }
+    if (savedLang) setLanguage(savedLang);
+    setIsLoading(false);
+    setSessionStart(new Date());
+    loadTodaySessions();
+  }, []);
+
+  const t = translations[language];
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-orange-100 via-yellow-100 to-red-100">
+        <div className="text-center">
+          <div className="text-6xl mb-4">🙏</div>
+          <div className="text-xl text-gray-600">लोड हो रहा है...</div>
+        </div>
+      </div>
+    );
+  }
+
+  const handleIncrement = () => {
+    const newCount = count + 1;
+    setCount(newCount);
+    
+    if (newCount % goal === 0 && newCount > 0) {
+      setShowCelebration(true);
+      playCompletionSound();
+      setTimeout(() => setShowCelebration(false), 3000);
+    }
+  };
+
+  const handleReset = () => {
+    if (count > 0 && confirm("क्या आप काउंट रीसेट करना चाहते हैं?")) {
+      setCount(0);
+    }
+  };
+
+  const saveSession = async () => {
+    if (count === 0) {
+      alert("कृपया पहले जप करें!");
+      return;
+    }
+
+    try {
+      const userId = localStorage.getItem('userId') || 'guest';
+      const now = new Date();
+      const session = {
+        user_id: userId,
+        mantra_id: mantraId,
+        mantra_name: mantraName,
+        count,
+        goal,
+        session_date: now.toISOString().split('T')[0],
+        session_time: now.toTimeString().split(' ')[0],
+        duration: sessionStart ? Math.floor((now.getTime() - sessionStart.getTime()) / 1000) : 0
+      };
+
+      // Direct Supabase insert
+      const { supabase } = await import('@/lib/supabase');
+      const { data, error } = await supabase
+        .from('mantra_sessions')
+        .insert([session])
+        .select();
+
+      if (error) {
+        console.error('Supabase error:', error);
+        alert(`❌ सेव करने में त्रुटि!\n${error.message}`);
+      } else {
+        console.log('Session saved:', data);
+        alert(`✅ सत्र सेव हो गया!\n${count} जप रिकॉर्ड किया गया।`);
+        setCount(0);
+        setSessionStart(new Date());
+        loadTodaySessions();
+      }
+    } catch (err: any) {
+      console.error('Save error:', err);
+      alert(`❌ सेव करने में त्रुटि!\n${err.message}`);
+    }
+  };
+
+  const playCompletionSound = () => {
+    // Vibration for mobile
+    if (navigator.vibrate) {
+      navigator.vibrate([200, 100, 200]);
+    }
+  };
+
+  const todayTotal = sessions.reduce((sum, s) => sum + s.count, 0);
+  const progress = (count / goal) * 100;
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-yellow-50">
+      {/* Header */}
+      <div className="bg-gradient-to-r from-orange-600 via-red-500 to-pink-500 text-white shadow-xl">
+        <div className="container mx-auto px-4 py-4">
+          <Link href="/" className="inline-flex items-center gap-2 text-white/90 hover:text-white mb-3">
+            <span>←</span> <span>{t.back}</span>
+          </Link>
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-3xl font-bold mb-1">{mantraName}</h1>
+              <p className="text-white/80">{t.todayTotal}: {todayTotal}</p>
+            </div>
+            <div className="text-5xl">🙏</div>
+          </div>
+        </div>
+      </div>
+
+      <div className="container mx-auto px-4 py-6 max-w-2xl">
+
+
+        {/* Main Counter */}
+        <div className="bg-white rounded-3xl shadow-2xl p-8 mb-6 border-4 border-orange-100">
+          {/* Progress Bar */}
+          <div className="mb-8">
+            <div className="flex justify-between text-sm font-semibold text-gray-700 mb-3">
+              <span>📈 {t.progress}</span>
+              <span className="text-orange-600">{Math.round(((count % goal) / goal) * 100)}%</span>
+            </div>
+            <div className="w-full bg-gray-200 rounded-full h-4 shadow-inner">
+              <div 
+                className="bg-gradient-to-r from-orange-500 via-red-500 to-pink-500 h-4 rounded-full transition-all duration-500 shadow-lg"
+                style={{ width: `${((count % goal) / goal) * 100}%` }}
+              ></div>
+            </div>
+          </div>
+
+          {/* Counter Display */}
+          <div className="text-center mb-8">
+            <div className="relative inline-block">
+              {/* Circular Progress */}
+              <svg className="w-64 h-64 transform -rotate-90">
+                <circle
+                  cx="128"
+                  cy="128"
+                  r="110"
+                  stroke="#f3f4f6"
+                  strokeWidth="16"
+                  fill="none"
+                />
+                <circle
+                  cx="128"
+                  cy="128"
+                  r="110"
+                  stroke="url(#gradient)"
+                  strokeWidth="16"
+                  fill="none"
+                  strokeDasharray={`${2 * Math.PI * 110}`}
+                  strokeDashoffset={`${2 * Math.PI * 110 * (1 - (count % goal) / goal)}`}
+                  strokeLinecap="round"
+                  className="transition-all duration-500"
+                />
+                <defs>
+                  <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stopColor="#f97316" />
+                    <stop offset="50%" stopColor="#ef4444" />
+                    <stop offset="100%" stopColor="#ec4899" />
+                  </linearGradient>
+                </defs>
+              </svg>
+              
+              {/* Center Content */}
+              <div className="absolute inset-0 flex flex-col items-center justify-center">
+                <div className="text-6xl font-black bg-gradient-to-r from-orange-600 via-red-500 to-pink-500 bg-clip-text text-transparent">
+                  {count % goal}
+                </div>
+                <div className="text-2xl font-bold text-gray-500 mb-2">/ {goal}</div>
+                <div className="text-sm text-gray-400 font-semibold">{t.total}: {todayTotal + count}</div>
+              </div>
+            </div>
+            
+          </div>
+          
+          {/* Celebration Animation */}
+          {showCelebration && (
+            <div className="fixed inset-0 pointer-events-none z-50 flex items-center justify-center">
+              <div className="text-center animate-bounce">
+                <div className="text-9xl mb-4">🎉</div>
+                <div className="text-5xl font-bold text-green-600 drop-shadow-2xl mb-3">
+                  {t.goalCompleted}
+                </div>
+                <div className="text-3xl font-bold text-orange-600 drop-shadow-xl">
+                  {mantraName}
+                </div>
+                <div className="text-2xl text-gray-700 mt-2">
+                  {goal} {t.chantsCompleted}
+                </div>
+              </div>
+              {/* Confetti */}
+              {[...Array(30)].map((_, i) => (
+                <div
+                  key={i}
+                  className="absolute animate-confetti"
+                  style={{
+                    left: `${Math.random() * 100}%`,
+                    top: '-10%',
+                    animationDelay: `${Math.random() * 0.5}s`,
+                    animationDuration: `${2 + Math.random() * 2}s`
+                  }}
+                >
+                  <div
+                    className="w-3 h-3 rounded-full"
+                    style={{
+                      backgroundColor: ['#f97316', '#ef4444', '#ec4899', '#8b5cf6', '#3b82f6', '#10b981'][Math.floor(Math.random() * 6)]
+                    }}
+                  />
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Tap Button */}
+          <button
+            onClick={handleIncrement}
+            className="w-full h-72 bg-gradient-to-br from-orange-500 via-red-500 to-pink-500 hover:from-orange-600 hover:via-red-600 hover:to-pink-600 text-white rounded-3xl text-4xl font-bold shadow-2xl active:scale-95 transition-all duration-150 mb-6 relative overflow-hidden group"
+          >
+            <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300"></div>
+            <div className="relative z-10">
+              <div className="text-6xl mb-2">🙏</div>
+              <div>{t.tapToCount}</div>
+            </div>
+          </button>
+
+          {/* Action Buttons */}
+          <div className="grid grid-cols-3 gap-4">
+            <button
+              onClick={() => setShowGoalModal(true)}
+              className="py-5 bg-gradient-to-br from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white rounded-2xl font-bold transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-1"
+            >
+              <div className="text-2xl mb-1">🎯</div>
+              <div className="text-xs">{t.goal}</div>
+            </button>
+            <button
+              onClick={handleReset}
+              className="py-5 bg-gradient-to-br from-gray-500 to-gray-600 hover:from-gray-600 hover:to-gray-700 text-white rounded-2xl font-bold transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-1"
+            >
+              <div className="text-2xl mb-1">🔄</div>
+              <div className="text-xs">{t.reset}</div>
+            </button>
+            <button
+              onClick={saveSession}
+              className="py-5 bg-gradient-to-br from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white rounded-2xl font-bold transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-1"
+            >
+              <div className="text-2xl mb-1">💾</div>
+              <div className="text-xs">{t.save}</div>
+            </button>
+          </div>
+        </div>
+
+        {/* Today's Sessions */}
+        {sessions.length > 0 && (
+          <div className="bg-white rounded-2xl shadow-xl p-6 border-2 border-orange-100">
+            <h3 className="text-2xl font-bold text-gray-800 mb-4 flex items-center gap-2">
+              <span>📅</span> {t.todaySessions}
+            </h3>
+            <div className="space-y-3">
+              {sessions.map((session, idx) => (
+                <div key={session.id} className="flex items-center justify-between p-4 bg-gradient-to-r from-orange-50 to-red-50 rounded-xl border border-orange-200 hover:shadow-md transition-shadow">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 bg-gradient-to-br from-orange-500 to-red-500 rounded-full flex items-center justify-center text-white font-bold">
+                      {idx + 1}
+                    </div>
+                    <div>
+                      <div className="font-bold text-gray-800 text-lg">
+                        {session.count} जप
+                      </div>
+                      <div className="text-sm text-gray-600">
+                        ⏰ {session.session_time}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <div className="text-sm font-semibold text-orange-600">
+                      {Math.floor(session.duration / 60)}:{(session.duration % 60).toString().padStart(2, '0')} मिनट
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Goal Modal */}
+      {showGoalModal && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-fadeIn">
+          <div className="bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl transform animate-scaleIn">
+            <div className="text-center mb-6">
+              <div className="text-5xl mb-3">🎯</div>
+              <h3 className="text-3xl font-bold text-gray-800">
+                {t.selectGoal}
+              </h3>
+            </div>
+            <div className="grid grid-cols-2 gap-4 mb-6">
+              {[108, 216, 324, 540, 1008, 10000].map((g) => (
+                <button
+                  key={g}
+                  onClick={() => {
+                    setGoal(g);
+                    setShowGoalModal(false);
+                  }}
+                  className={`py-5 rounded-2xl font-bold text-lg transition-all transform hover:scale-105 shadow-lg ${
+                    goal === g
+                      ? "bg-gradient-to-br from-orange-500 to-red-500 text-white shadow-xl"
+                      : "bg-gray-100 hover:bg-gray-200 text-gray-700"
+                  }`}
+                >
+                  {g}
+                </button>
+              ))}
+            </div>
+            <div className="mb-6">
+              <label className="block text-sm font-bold text-gray-700 mb-3">
+                🖊️ {t.customGoal}
+              </label>
+              <input
+                type="number"
+                className="w-full px-4 py-4 border-2 border-gray-300 rounded-2xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 text-lg font-semibold"
+                placeholder={t.enterGoal}
+                onChange={(e) => setGoal(parseInt(e.target.value) || 108)}
+              />
+            </div>
+            <button
+              onClick={() => setShowGoalModal(false)}
+              className="w-full py-4 bg-gradient-to-r from-gray-500 to-gray-600 hover:from-gray-600 hover:to-gray-700 text-white rounded-2xl font-bold transition-all shadow-lg"
+            >
+              {t.close}
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}

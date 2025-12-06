@@ -13,8 +13,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Daily Mantra & Meditation",
-  description: "Your daily practice of mindfulness and inner peace",
+  title: "सनातन ग्रंथ - Daily Mantra & Meditation",
+  description: "Ramayana, Mahabharata, Bhagavad Gita - Complete Hindu scriptures with audio, annotations, and study features",
 };
 
 export default function RootLayout({

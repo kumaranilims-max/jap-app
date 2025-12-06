@@ -1,0 +1,77 @@
+// Translation file for Hindi and English
+export const translations = {
+  hi: {
+    // Home page
+    appTitle: "मंत्र जप",
+    appSubtitle: "आध्यात्मिक यात्रा",
+    todayChants: "आज के जप",
+    sessions: "सत्र",
+    heroTitle: "दैनिक मंत्र और ध्यान",
+    heroSubtitle: "पवित्र ग्रंथों का अध्ययन और मनन",
+    mantrasAvailable: "मंत्र उपलब्ध",
+    startChanting: "जप शुरू करें",
+    counter: "काउंटर",
+    counterDesc: "टैप करके गिनें",
+    autoSave: "ऑटो सेव",
+    autoSaveDesc: "डेटाबेस में सेव",
+    reports: "रिपोर्ट",
+    reportsDesc: "प्रगति ट्रैक करें",
+    goal: "लक्ष्य",
+    goalDesc: "108, 1008, कस्टम",
+    
+    // Counter page
+    todayTotal: "आज का कुल",
+    progress: "प्रगति",
+    total: "कुल",
+    goalCompleted: "लक्ष्य पूर्ण!",
+    chantsCompleted: "जप पूर्ण हुए!",
+    tapToCount: "टैप करें",
+    reset: "रीसेट",
+    save: "सेव",
+    todaySessions: "आज के सत्र",
+    selectGoal: "लक्ष्य चुनें",
+    customGoal: "कस्टम लक्ष्य",
+    enterGoal: "अपना लक्ष्य दर्ज करें",
+    close: "बंद करें",
+    back: "वापस",
+    logout: "Logout"
+  },
+  en: {
+    // Home page
+    appTitle: "Mantra Jap",
+    appSubtitle: "Spiritual Journey",
+    todayChants: "Today's Chants",
+    sessions: "Sessions",
+    heroTitle: "Daily Mantra & Meditation",
+    heroSubtitle: "Study and Contemplate Sacred Texts",
+    mantrasAvailable: "Mantras Available",
+    startChanting: "Start Chanting",
+    counter: "Counter",
+    counterDesc: "Tap to Count",
+    autoSave: "Auto Save",
+    autoSaveDesc: "Save to Database",
+    reports: "Reports",
+    reportsDesc: "Track Progress",
+    goal: "Goal",
+    goalDesc: "108, 1008, Custom",
+    
+    // Counter page
+    todayTotal: "Today's Total",
+    progress: "Progress",
+    total: "Total",
+    goalCompleted: "Goal Completed!",
+    chantsCompleted: "Chants Completed!",
+    tapToCount: "Tap to Count",
+    reset: "Reset",
+    save: "Save",
+    todaySessions: "Today's Sessions",
+    selectGoal: "Select Goal",
+    customGoal: "Custom Goal",
+    enterGoal: "Enter your goal",
+    close: "Close",
+    back: "Back",
+    logout: "Logout"
+  }
+};
+
+export type Language = 'hi' | 'en';
