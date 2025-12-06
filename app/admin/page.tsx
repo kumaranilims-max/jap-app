@@ -22,7 +22,7 @@ export default function AdminPanel() {
     category: "",
     color: "bg-orange-500",
     icon: "🕉️",
-    image_url: ""
+    background_image: ""
   });
   const [uploading, setUploading] = useState(false);
 
@@ -73,7 +73,7 @@ export default function AdminPanel() {
         .from('mantra-images')
         .getPublicUrl(filePath);
 
-      setFormData({ ...formData, image_url: data.publicUrl });
+      setFormData({ ...formData, background_image: data.publicUrl });
       alert('Image uploaded successfully!');
     } catch (error) {
       alert('Error uploading image');
@@ -99,7 +99,7 @@ export default function AdminPanel() {
       category: formData.category,
       color: formData.color,
       icon: formData.icon,
-      image_url: formData.image_url
+      background_image: formData.background_image
     };
 
     let error;
@@ -129,7 +129,7 @@ export default function AdminPanel() {
         category: "",
         color: "bg-orange-500",
         icon: "🕉️",
-        image_url: ""
+        background_image: ""
       });
       fetchMantras();
     }
@@ -156,7 +156,7 @@ export default function AdminPanel() {
       category: mantra.category,
       color: mantra.color,
       icon: mantra.icon,
-      image_url: mantra.image_url || ""
+      background_image: mantra.background_image || ""
     });
     setShowForm(true);
   };
@@ -307,9 +307,9 @@ export default function AdminPanel() {
                   className="p-3 border rounded-lg w-full"
                 />
                 {uploading && <p className="text-sm text-gray-500 mt-1">Uploading...</p>}
-                {formData.image_url && (
+                {formData.background_image && (
                   <div className="mt-2">
-                    <img src={formData.image_url} alt="Preview" className="w-32 h-32 object-cover rounded-lg" />
+                    <img src={formData.background_image} alt="Preview" className="w-32 h-32 object-cover rounded-lg" />
                   </div>
                 )}
               </div>
