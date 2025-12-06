@@ -188,7 +188,7 @@ export default function AdminPanel() {
                     category: "",
                     color: "bg-orange-500",
                     icon: "🕉️",
-                    image_url: ""
+                    background_image: ""
                   });
                 } else {
                   setShowForm(true);
