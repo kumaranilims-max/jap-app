@@ -394,7 +394,7 @@ function CounterContent() {
                   <div className="bg-white rounded-2xl p-4 md:p-8 shadow-xl mb-4 md:mb-6 border-2 border-orange-100">
                     <div className="text-center">
                       <div className="text-lg md:text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-orange-600 to-red-600 mb-2 leading-relaxed">
-                        {chalisaVerses[currentVerse]?.verse?.split('\n').map((line, i) => (
+                        {chalisaVerses[currentVerse]?.verse?.split('\n').map((line: string, i: number) => (
                           <div key={i} className="mb-1 md:mb-2">{line}</div>
                         ))}
                       </div>
