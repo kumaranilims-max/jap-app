@@ -34,7 +34,7 @@ export const translations = {
     enterGoal: "अपना लक्ष्य दर्ज करें",
     close: "बंद करें",
     back: "वापस",
-    logout: "Logout"
+    logout: "लॉगआउट"
   },
   en: {
     // Home page

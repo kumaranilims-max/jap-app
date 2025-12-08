@@ -145,43 +145,41 @@ function CounterContent() {
       {/* Header */}
       <div className="bg-gradient-to-r from-orange-600 via-red-500 to-pink-500 text-white shadow-xl">
         <div className="container mx-auto px-4 py-4">
-          <Link href="/" className="inline-flex items-center gap-2 text-white/90 hover:text-white mb-3">
+          <Link href="/" className="inline-flex items-center gap-2 text-white/90 hover:text-white mb-3 text-sm md:text-base">
             <span>←</span> <span>{t.back}</span>
           </Link>
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold mb-1">{mantraName}</h1>
-              <p className="text-white/80">{t.todayTotal}: {todayTotal}</p>
+              <h1 className="text-xl md:text-3xl font-bold mb-1">{mantraName}</h1>
+              <p className="text-white/80 text-sm md:text-base">{t.todayTotal}: {todayTotal}</p>
             </div>
-            <div className="text-5xl">🙏</div>
+            <div className="text-4xl md:text-5xl">🙏</div>
           </div>
         </div>
       </div>
 
-      <div className="container mx-auto px-4 py-6 max-w-2xl">
-
-
+      <div className="container mx-auto px-4 py-4 md:py-6 max-w-2xl">
         {/* Main Counter */}
-        <div className="bg-white rounded-3xl shadow-2xl p-8 mb-6 border-4 border-orange-100">
+        <div className="bg-white rounded-2xl md:rounded-3xl shadow-2xl p-4 md:p-8 mb-4 md:mb-6 border-2 md:border-4 border-orange-100">
           {/* Progress Bar */}
-          <div className="mb-8">
-            <div className="flex justify-between text-sm font-semibold text-gray-700 mb-3">
+          <div className="mb-4 md:mb-8">
+            <div className="flex justify-between text-xs md:text-sm font-semibold text-gray-700 mb-2 md:mb-3">
               <span>📈 {t.progress}</span>
               <span className="text-orange-600">{Math.round(((count % goal) / goal) * 100)}%</span>
             </div>
-            <div className="w-full bg-gray-200 rounded-full h-4 shadow-inner">
+            <div className="w-full bg-gray-200 rounded-full h-3 md:h-4 shadow-inner">
               <div 
-                className="bg-gradient-to-r from-orange-500 via-red-500 to-pink-500 h-4 rounded-full transition-all duration-500 shadow-lg"
+                className="bg-gradient-to-r from-orange-500 via-red-500 to-pink-500 h-3 md:h-4 rounded-full transition-all duration-500 shadow-lg"
                 style={{ width: `${((count % goal) / goal) * 100}%` }}
               ></div>
             </div>
           </div>
 
           {/* Counter Display */}
-          <div className="text-center mb-8">
+          <div className="text-center mb-4 md:mb-8">
             <div className="relative inline-block">
               {/* Circular Progress */}
-              <svg className="w-64 h-64 transform -rotate-90">
+              <svg className="w-48 h-48 md:w-64 md:h-64 transform -rotate-90" viewBox="0 0 256 256">
                 <circle
                   cx="128"
                   cy="128"
@@ -213,11 +211,11 @@ function CounterContent() {
               
               {/* Center Content */}
               <div className="absolute inset-0 flex flex-col items-center justify-center">
-                <div className="text-6xl font-black bg-gradient-to-r from-orange-600 via-red-500 to-pink-500 bg-clip-text text-transparent">
+                <div className="text-4xl md:text-6xl font-black bg-gradient-to-r from-orange-600 via-red-500 to-pink-500 bg-clip-text text-transparent">
                   {count % goal}
                 </div>
-                <div className="text-2xl font-bold text-gray-500 mb-2">/ {goal}</div>
-                <div className="text-sm text-gray-400 font-semibold">{t.total}: {todayTotal + count}</div>
+                <div className="text-xl md:text-2xl font-bold text-gray-500 mb-1 md:mb-2">/ {goal}</div>
+                <div className="text-xs md:text-sm text-gray-400 font-semibold">{t.total}: {todayTotal + count}</div>
               </div>
             </div>
             
@@ -264,36 +262,36 @@ function CounterContent() {
           {/* Tap Button */}
           <button
             onClick={handleIncrement}
-            className="w-full h-72 bg-gradient-to-br from-orange-500 via-red-500 to-pink-500 hover:from-orange-600 hover:via-red-600 hover:to-pink-600 text-white rounded-3xl text-4xl font-bold shadow-2xl active:scale-95 transition-all duration-150 mb-6 relative overflow-hidden group"
+            className="w-full h-48 md:h-72 bg-gradient-to-br from-orange-500 via-red-500 to-pink-500 hover:from-orange-600 hover:via-red-600 hover:to-pink-600 text-white rounded-2xl md:rounded-3xl text-2xl md:text-4xl font-bold shadow-2xl active:scale-95 transition-all duration-150 mb-4 md:mb-6 relative overflow-hidden group"
           >
             <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300"></div>
             <div className="relative z-10">
-              <div className="text-6xl mb-2">🙏</div>
+              <div className="text-5xl md:text-6xl mb-2">🙏</div>
               <div>{t.tapToCount}</div>
             </div>
           </button>
 
           {/* Action Buttons */}
-          <div className="grid grid-cols-3 gap-4">
+          <div className="grid grid-cols-3 gap-2 md:gap-4">
             <button
               onClick={() => setShowGoalModal(true)}
-              className="py-5 bg-gradient-to-br from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white rounded-2xl font-bold transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-1"
+              className="py-3 md:py-5 bg-gradient-to-br from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white rounded-xl md:rounded-2xl font-bold transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-1"
             >
-              <div className="text-2xl mb-1">🎯</div>
+              <div className="text-xl md:text-2xl mb-1">🎯</div>
               <div className="text-xs">{t.goal}</div>
             </button>
             <button
               onClick={handleReset}
-              className="py-5 bg-gradient-to-br from-gray-500 to-gray-600 hover:from-gray-600 hover:to-gray-700 text-white rounded-2xl font-bold transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-1"
+              className="py-3 md:py-5 bg-gradient-to-br from-gray-500 to-gray-600 hover:from-gray-600 hover:to-gray-700 text-white rounded-xl md:rounded-2xl font-bold transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-1"
             >
-              <div className="text-2xl mb-1">🔄</div>
+              <div className="text-xl md:text-2xl mb-1">🔄</div>
               <div className="text-xs">{t.reset}</div>
             </button>
             <button
               onClick={saveSession}
-              className="py-5 bg-gradient-to-br from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white rounded-2xl font-bold transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-1"
+              className="py-3 md:py-5 bg-gradient-to-br from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white rounded-xl md:rounded-2xl font-bold transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-1"
             >
-              <div className="text-2xl mb-1">💾</div>
+              <div className="text-xl md:text-2xl mb-1">💾</div>
               <div className="text-xs">{t.save}</div>
             </button>
           </div>
@@ -301,8 +299,8 @@ function CounterContent() {
 
         {/* Today's Sessions */}
         {sessions.length > 0 && (
-          <div className="bg-white rounded-2xl shadow-xl p-6 border-2 border-orange-100">
-            <h3 className="text-2xl font-bold text-gray-800 mb-4 flex items-center gap-2">
+          <div className="bg-white rounded-2xl shadow-xl p-4 md:p-6 border-2 border-orange-100">
+            <h3 className="text-xl md:text-2xl font-bold text-gray-800 mb-4 flex items-center gap-2">
               <span>📅</span> {t.todaySessions}
             </h3>
             <div className="space-y-3">
