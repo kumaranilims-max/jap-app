@@ -1,10 +1,10 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { translations, Language } from "@/lib/translations";
 
-export default function CounterPage() {
+function CounterContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const mantraName = searchParams.get("name") || "मंत्र";
@@ -382,5 +382,20 @@ export default function CounterPage() {
         </div>
       )}
     </div>
+  );
+}
+
+export default function CounterPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-orange-100 via-yellow-100 to-red-100">
+        <div className="text-center">
+          <div className="text-6xl mb-4">🙏</div>
+          <div className="text-xl text-gray-600">लोड हो रहा है...</div>
+        </div>
+      </div>
+    }>
+      <CounterContent />
+    </Suspense>
   );
 }
