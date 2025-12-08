@@ -25,7 +25,6 @@ export default function LoginPage() {
         .single();
 
       if (error || !data) {
-        alert(language === 'hi' ? '❌ यूजर नहीं मिला!' : '❌ User not found!');
         setLoading(false);
         return;
       }
@@ -36,10 +35,8 @@ export default function LoginPage() {
       localStorage.setItem('userType', data.user_type || 'user');
       localStorage.setItem('language', language);
       
-      alert(language === 'hi' ? '✅ लॉगिन सफल!' : '✅ Login successful!');
       router.push('/mantra');
     } catch (err) {
-      alert(language === 'hi' ? '❌ लॉगिन में त्रुटि!' : '❌ Login error!');
       setLoading(false);
     }
   };

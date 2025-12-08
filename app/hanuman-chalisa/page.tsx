@@ -1,49 +1,24 @@
 "use client";
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { supabase } from "@/lib/supabase";
 
 export default function HanumanChalisa() {
   const [language, setLanguage] = useState<'hindi' | 'english'>('hindi');
   const [currentVerse, setCurrentVerse] = useState(0);
   const [readCount, setReadCount] = useState(0);
-
-  const chalisaVerses = [
-    {
-      hindi: "श्रीगुरु चरन सरोज रज, निज मनु मुकुरु सुधारि।",
-      english: "With the dust of Guru's Lotus feet, I clean the mirror of my mind",
-      hindi2: "बरनऊं रघुबर बिमल जसु, जो दायकु फल चारि।।",
-      english2: "And narrate the pure fame of Raghubar, which bestows the four fruits of life."
-    },
-    {
-      hindi: "बुद्धिहीन तनु जानिके, सुमिरौं पवन-कुमार।",
-      english: "Knowing myself to be ignorant, I urge you, O Hanuman",
-      hindi2: "बल बुद्धि बिद्या देहु मोहिं, हरहु कलेस बिकार।।",
-      english2: "Give me strength, wisdom and knowledge, removing all my sufferings and blemishes."
-    },
-    {
-      hindi: "जय हनुमान ज्ञान गुन सागर।",
-      english: "Victory to Hanuman, Ocean of wisdom and virtue",
-      hindi2: "जय कपीस तिहुं लोक उजागर।।",
-      english2: "Victory to the Monkey Lord, illuminator of the three worlds."
-    },
-    {
-      hindi: "राम दूत अतुलित बल धामा।",
-      english: "You are Ram's messenger, and the abode of matchless power",
-      hindi2: "अंजनि-पुत्र पवनसुत नामा।।",
-      english2: "You are known as the son of Anjani and Pavana (Wind-God)."
-    },
-    {
-      hindi: "महाबीर बिक्रम बजरंगी।",
-      english: "O great brave warrior, you are as strong as a thunderbolt",
-      hindi2: "कुमति निवार सुमति के संगी।।",
-      english2: "You remove evil thoughts and are the companion of good sense."
-    }
-  ];
+  const [chalisaVerses, setChalisaVerses] = useState<any[]>([]);
 
   useEffect(() => {
     const saved = localStorage.getItem('chalisa-read-count');
     if (saved) setReadCount(parseInt(saved));
+    fetchVerses();
   }, []);
+
+  const fetchVerses = async () => {
+    const { data } = await supabase.from('chalisa_verses').select('*').order('verse_number');
+    if (data) setChalisaVerses(data);
+  };
 
   const nextVerse = () => {
     if (currentVerse < chalisaVerses.length - 1) {
@@ -130,26 +105,35 @@ export default function HanumanChalisa() {
               </span>
             </div>
             
-            <div className="mb-8 p-6 bg-gradient-to-r from-red-50 to-orange-50 dark:from-gray-700 dark:to-gray-600 rounded-lg">
-              <div className="text-center">
-                <p className="text-2xl font-semibold text-red-700 dark:text-red-300 mb-2">
-                  {chalisaVerses[currentVerse].hindi}
-                </p>
-                <p className="text-2xl font-semibold text-red-700 dark:text-red-300 mb-4">
-                  {chalisaVerses[currentVerse].hindi2}
-                </p>
-                {language === 'english' && (
-                  <div className="border-t pt-4">
-                    <p className="text-lg text-gray-600 dark:text-gray-300 mb-1">
-                      {chalisaVerses[currentVerse].english}
-                    </p>
-                    <p className="text-lg text-gray-600 dark:text-gray-300">
-                      {chalisaVerses[currentVerse].english2}
-                    </p>
+            {chalisaVerses.length > 0 && (
+              <div className="mb-8">
+                {chalisaVerses[currentVerse].verse_image && (
+                  <div className="mb-4 rounded-lg overflow-hidden">
+                    <img 
+                      src={chalisaVerses[currentVerse].verse_image} 
+                      alt={`Verse ${currentVerse + 1}`}
+                      className="w-full h-64 object-cover"
+                    />
                   </div>
                 )}
+                <div className="p-6 bg-gradient-to-r from-red-50 to-orange-50 dark:from-gray-700 dark:to-gray-600 rounded-lg">
+                  <div className="text-center">
+                    <p className="text-2xl font-semibold text-red-700 dark:text-red-300 mb-4 whitespace-pre-line">
+                      {language === 'hindi' 
+                        ? chalisaVerses[currentVerse].verse_text_hindi 
+                        : chalisaVerses[currentVerse].verse_text_english}
+                    </p>
+                    <div className="border-t pt-4">
+                      <p className="text-lg text-gray-600 dark:text-gray-300">
+                        {language === 'hindi' 
+                          ? chalisaVerses[currentVerse].meaning_hindi 
+                          : chalisaVerses[currentVerse].meaning_english}
+                      </p>
+                    </div>
+                  </div>
+                </div>
               </div>
-            </div>
+            )}
 
             {/* Navigation Buttons */}
             <div className="flex justify-between items-center">

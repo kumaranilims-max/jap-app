@@ -17,11 +17,36 @@ function CounterContent() {
   const [showGoalModal, setShowGoalModal] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [showCelebration, setShowCelebration] = useState(false);
-  const [language, setLanguage] = useState<Language>('hi');
+  const [language, setLanguage] = useState<Language>('en');
   const [isListening, setIsListening] = useState(false);
   const [audioContext, setAudioContext] = useState<any>(null);
   const [analyser, setAnalyser] = useState<any>(null);
   const [mediaStream, setMediaStream] = useState<any>(null);
+  const [currentVerse, setCurrentVerse] = useState(0);
+  const [chalisaVerses, setChalisaVerses] = useState<any[]>([]);
+  
+  const loadChalisaVerses = async () => {
+    try {
+      const { supabase } = await import('@/lib/supabase');
+      const { data, error } = await supabase
+        .from('chalisa_verses')
+        .select('*')
+        .eq('mantra_id', mantraId)
+        .order('verse_number', { ascending: true });
+      
+      if (error) {
+        console.error('Load verses error:', error);
+      } else if (data && data.length > 0) {
+        setChalisaVerses(data.map(v => ({
+          verse: v.verse_text_hindi || v.verse_text,
+          meaning: v.meaning_hindi,
+          image: v.verse_image
+        })));
+      }
+    } catch (err) {
+      console.error('Load verses error:', err);
+    }
+  };
 
   const loadTodaySessions = async () => {
     try {
@@ -55,10 +80,15 @@ function CounterContent() {
       window.location.href = '/login';
       return;
     }
-    if (savedLang) setLanguage(savedLang);
+    if (savedLang) {
+      setLanguage(savedLang);
+    } else {
+      localStorage.setItem('language', 'en');
+    }
     setIsLoading(false);
     setSessionStart(new Date());
     loadTodaySessions();
+    loadChalisaVerses();
   }, []);
   
   const toggleVoiceCounting = async () => {
@@ -326,6 +356,84 @@ function CounterContent() {
                   />
                 </div>
               ))}
+            </div>
+          )}
+
+          {/* Hanuman Chalisa Verses */}
+          {mantraName.toLowerCase().includes('hanuman') && chalisaVerses.length > 0 && (
+            <div className="mb-6">
+              <div className="bg-gradient-to-br from-red-50 via-orange-50 to-yellow-50 rounded-3xl shadow-2xl overflow-hidden border-2 border-red-200">
+                {/* Verse Image */}
+                {chalisaVerses[currentVerse]?.image && (
+                  <div className="relative h-64 md:h-80 overflow-hidden">
+                    <img 
+                      src={chalisaVerses[currentVerse].image} 
+                      alt={`Verse ${currentVerse + 1}`}
+                      className="w-full h-full object-cover"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent"></div>
+                    <div className="absolute bottom-4 left-4 right-4">
+                      <div className="inline-block bg-gradient-to-r from-orange-500 to-red-500 text-white px-6 py-2 rounded-full text-sm font-bold shadow-lg">
+                        📜 श्लोक #{currentVerse + 1}
+                      </div>
+                    </div>
+                  </div>
+                )}
+                
+                {/* Verse Number Badge (if no image) */}
+                {!chalisaVerses[currentVerse]?.image && (
+                  <div className="text-center pt-6">
+                    <div className="inline-block bg-gradient-to-r from-orange-500 to-red-500 text-white px-6 py-2 rounded-full text-sm font-bold shadow-lg mb-4">
+                      📜 श्लोक #{currentVerse + 1}
+                    </div>
+                  </div>
+                )}
+
+                {/* Verse Text */}
+                <div className="p-4 md:p-8">
+                  <div className="bg-white rounded-2xl p-4 md:p-8 shadow-xl mb-4 md:mb-6 border-2 border-orange-100">
+                    <div className="text-center">
+                      <div className="text-lg md:text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-orange-600 to-red-600 mb-2 leading-relaxed">
+                        {chalisaVerses[currentVerse]?.verse?.split('\n').map((line, i) => (
+                          <div key={i} className="mb-1 md:mb-2">{line}</div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Meaning */}
+                  <div className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-2xl p-4 md:p-8 shadow-lg border-2 border-purple-200">
+                    <div className="flex items-center justify-center gap-2 mb-3">
+                      <span className="text-xl md:text-2xl">📚</span>
+                      <div className="text-lg md:text-xl font-bold text-purple-700">अर्थ</div>
+                    </div>
+                    <div className="text-sm md:text-lg text-gray-800 leading-relaxed">
+                      {chalisaVerses[currentVerse]?.meaning}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Navigation */}
+                <div className="flex gap-3 justify-center items-center p-6 bg-gradient-to-r from-orange-100 to-red-100">
+                  <button
+                    onClick={() => setCurrentVerse(prev => Math.max(0, prev - 1))}
+                    disabled={currentVerse === 0}
+                    className="px-6 py-3 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 disabled:from-gray-300 disabled:to-gray-400 disabled:cursor-not-allowed text-white rounded-2xl font-bold shadow-lg transition-all transform hover:scale-105 disabled:hover:scale-100"
+                  >
+                    ← पिछला
+                  </button>
+                  <div className="px-6 py-3 bg-gradient-to-r from-orange-500 to-red-500 text-white rounded-2xl font-bold shadow-lg">
+                    {currentVerse + 1} / {chalisaVerses.length}
+                  </div>
+                  <button
+                    onClick={() => setCurrentVerse(prev => Math.min(chalisaVerses.length - 1, prev + 1))}
+                    disabled={currentVerse === chalisaVerses.length - 1}
+                    className="px-6 py-3 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 disabled:from-gray-300 disabled:to-gray-400 disabled:cursor-not-allowed text-white rounded-2xl font-bold shadow-lg transition-all transform hover:scale-105 disabled:hover:scale-100"
+                  >
+                    अगला →
+                  </button>
+                </div>
+              </div>
             </div>
           )}
 

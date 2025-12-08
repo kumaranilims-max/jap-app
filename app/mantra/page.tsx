@@ -2,42 +2,43 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
+import { translations, Language } from "@/lib/translations";
 
 export default function MantraPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [mantras, setMantras] = useState<any[]>([]);
   const [userEmail, setUserEmail] = useState('');
+  const [language, setLanguage] = useState<Language>('en');
 
   useEffect(() => {
     const userId = localStorage.getItem('userId');
     const name = localStorage.getItem('userName');
     const email = localStorage.getItem('userEmail');
+    const savedLang = localStorage.getItem('language') as Language;
     if (!userId) {
       window.location.href = '/login';
       return;
     }
+    if (savedLang) setLanguage(savedLang);
+    else localStorage.setItem('language', 'en');
     setUserEmail(name || email || 'User');
     fetchMantras();
   }, []);
 
   const fetchMantras = async () => {
     const { data } = await supabase.from('mantras').select('*');
-    console.log('Fetched mantras:', data);
-    if (data) {
-      data.forEach(m => {
-        console.log(`${m.title_hindi} - background_image:`, m.background_image);
-      });
-      setMantras(data);
-    }
+    if (data) setMantras(data);
     setIsLoading(false);
   };
+
+  const t = translations[language];
 
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-orange-50 via-yellow-50 to-red-50">
         <div className="text-center">
           <div className="text-6xl mb-4">🙏</div>
-          <div className="text-xl text-gray-600">लोड हो रहा है...</div>
+          <div className="text-xl text-gray-600">{language === 'hi' ? 'लोड हो रहा है...' : 'Loading...'}</div>
         </div>
       </div>
     );
@@ -49,7 +50,7 @@ export default function MantraPage() {
         <header className="mb-8">
           <div className="flex items-center justify-between mb-4">
             <Link href="/" className="text-orange-500 hover:text-orange-600">
-              ← मुख्य पृष्ठ
+              {t.back}
             </Link>
             <div className="flex items-center gap-3">
               <span className="text-sm text-gray-600 font-medium">
@@ -71,17 +72,17 @@ export default function MantraPage() {
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-4xl font-bold text-orange-600 dark:text-orange-400 mb-2">
-                🙏 मंत्र जप काउंटर
+                🙏 {t.appTitle}
               </h1>
               <p className="text-gray-600 dark:text-gray-300">
-                अपने दैनिक मंत्र जप को ट्रैक करें
+                {t.heroSubtitle}
               </p>
             </div>
             <Link 
               href="/mantra/reports"
               className="px-6 py-3 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors flex items-center gap-2"
             >
-              📊 रिपोर्ट देखें
+              📊 {t.reports}
             </Link>
           </div>
         </header>
@@ -90,7 +91,7 @@ export default function MantraPage() {
           {mantras.map((mantra) => (
             <Link
               key={mantra.id}
-              href={`/mantra/counter?id=${mantra.id}&name=${encodeURIComponent(mantra.title_hindi)}`}
+              href={`/mantra/counter?id=${mantra.id}&name=${encodeURIComponent(language === 'hi' ? mantra.title_hindi : mantra.title_english)}`}
               className="group block rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden relative bg-white"
             >
               {mantra.background_image && (
@@ -119,16 +120,16 @@ export default function MantraPage() {
                 </div>
                 
                 <h3 className="text-xl font-bold mb-3 text-gray-800">
-                  {mantra.title_hindi}
+                  {language === 'hi' ? mantra.title_hindi : mantra.title_english}
                 </h3>
                 
                 <p className="text-sm leading-relaxed mb-4 line-clamp-2 text-gray-600">
-                  {mantra.subtitle_hindi || mantra.description_hindi}
+                  {language === 'hi' ? (mantra.subtitle_hindi || mantra.description_hindi) : (mantra.subtitle_english || mantra.description_english)}
                 </p>
                 
                 <div className="flex items-center justify-between pt-4 border-t border-gray-200">
                   <span className="text-sm text-gray-500">
-                    जप शुरू करें
+                    {t.startChanting}
                   </span>
                   <span className="group-hover:translate-x-1 transition-transform text-xl text-orange-500">
                     →
@@ -141,28 +142,28 @@ export default function MantraPage() {
 
         <div className="mt-12 bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
           <h3 className="text-2xl font-bold text-gray-800 dark:text-white mb-4">
-            📱 फीचर्स
+            📱 {language === 'hi' ? 'फीचर्स' : 'Features'}
           </h3>
           <div className="grid md:grid-cols-4 gap-4">
             <div className="text-center p-4">
               <div className="text-3xl mb-2">🔢</div>
-              <h4 className="font-semibold text-gray-800 dark:text-white">काउंटर</h4>
-              <p className="text-sm text-gray-600 dark:text-gray-400">टैप करके गिनें</p>
+              <h4 className="font-semibold text-gray-800 dark:text-white">{t.counter}</h4>
+              <p className="text-sm text-gray-600 dark:text-gray-400">{t.counterDesc}</p>
             </div>
             <div className="text-center p-4">
               <div className="text-3xl mb-2">💾</div>
-              <h4 className="font-semibold text-gray-800 dark:text-white">ऑटो सेव</h4>
-              <p className="text-sm text-gray-600 dark:text-gray-400">डेटाबेस में सेव</p>
+              <h4 className="font-semibold text-gray-800 dark:text-white">{t.autoSave}</h4>
+              <p className="text-sm text-gray-600 dark:text-gray-400">{t.autoSaveDesc}</p>
             </div>
             <div className="text-center p-4">
               <div className="text-3xl mb-2">📊</div>
-              <h4 className="font-semibold text-gray-800 dark:text-white">रिपोर्ट</h4>
-              <p className="text-sm text-gray-600 dark:text-gray-400">दैनिक/साप्ताहिक/मासिक</p>
+              <h4 className="font-semibold text-gray-800 dark:text-white">{t.reports}</h4>
+              <p className="text-sm text-gray-600 dark:text-gray-400">{t.reportsDesc}</p>
             </div>
             <div className="text-center p-4">
               <div className="text-3xl mb-2">🎯</div>
-              <h4 className="font-semibold text-gray-800 dark:text-white">लक्ष्य</h4>
-              <p className="text-sm text-gray-600 dark:text-gray-400">108, 1008, कस्टम</p>
+              <h4 className="font-semibold text-gray-800 dark:text-white">{t.goal}</h4>
+              <p className="text-sm text-gray-600 dark:text-gray-400">{t.goalDesc}</p>
             </div>
           </div>
         </div>

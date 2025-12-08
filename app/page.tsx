@@ -22,8 +22,11 @@ export default function Home() {
       return;
     }
     
-    if (savedLang) setLanguage(savedLang);
-    else localStorage.setItem('language', 'en');
+    if (savedLang) {
+      setLanguage(savedLang);
+    } else {
+      localStorage.setItem('language', 'en');
+    }
     setUserName(name || email || 'User');
     fetchMantras();
     fetchTodayStats(userId);
@@ -103,15 +106,13 @@ export default function Home() {
               >
                 📊 {language === 'hi' ? 'रिपोर्ट' : 'Reports'}
               </Link>
-              <button
-                onClick={() => {
-                  localStorage.clear();
-                  window.location.href = '/login';
-                }}
+              <Link
+                href="/login"
+                onClick={() => localStorage.clear()}
                 className="px-3 md:px-4 py-2 bg-white/20 backdrop-blur-sm hover:bg-white/30 rounded-full transition-all text-xs md:text-sm"
               >
                 {t.logout}
-              </button>
+              </Link>
             </div>
           </div>
         </div>
