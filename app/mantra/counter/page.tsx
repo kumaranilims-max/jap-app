@@ -18,6 +18,10 @@ function CounterContent() {
   const [isLoading, setIsLoading] = useState(true);
   const [showCelebration, setShowCelebration] = useState(false);
   const [language, setLanguage] = useState<Language>('hi');
+  const [isListening, setIsListening] = useState(false);
+  const [audioContext, setAudioContext] = useState<any>(null);
+  const [analyser, setAnalyser] = useState<any>(null);
+  const [mediaStream, setMediaStream] = useState<any>(null);
 
   const loadTodaySessions = async () => {
     try {
@@ -56,6 +60,72 @@ function CounterContent() {
     setSessionStart(new Date());
     loadTodaySessions();
   }, []);
+  
+  const toggleVoiceCounting = async () => {
+    if (isListening) {
+      // Stop listening
+      if (mediaStream) {
+        mediaStream.getTracks().forEach((track: any) => track.stop());
+      }
+      if (audioContext) {
+        audioContext.close();
+      }
+      setIsListening(false);
+      setMediaStream(null);
+      setAudioContext(null);
+      setAnalyser(null);
+    } else {
+      // Start listening
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        const context = new (window.AudioContext || (window as any).webkitAudioContext)();
+        const source = context.createMediaStreamSource(stream);
+        const analyserNode = context.createAnalyser();
+        analyserNode.fftSize = 256;
+        source.connect(analyserNode);
+        
+        setMediaStream(stream);
+        setAudioContext(context);
+        setAnalyser(analyserNode);
+        setIsListening(true);
+        
+        // Start monitoring volume
+        let lastSoundTime = 0;
+        const checkVolume = () => {
+          if (!analyserNode) return;
+          
+          const dataArray = new Uint8Array(analyserNode.frequencyBinCount);
+          analyserNode.getByteFrequencyData(dataArray);
+          
+          const average = dataArray.reduce((a, b) => a + b) / dataArray.length;
+          const now = Date.now();
+          
+          // Detect sound above threshold with 500ms cooldown
+          if (average > 30 && now - lastSoundTime > 500) {
+            lastSoundTime = now;
+            setCount(prev => {
+              const newCount = prev + 1;
+              if (newCount % goal === 0 && newCount > 0) {
+                setShowCelebration(true);
+                playCompletionSound();
+                setTimeout(() => setShowCelebration(false), 3000);
+              }
+              return newCount;
+            });
+          }
+          
+          if (isListening) {
+            requestAnimationFrame(checkVolume);
+          }
+        };
+        
+        checkVolume();
+      } catch (err) {
+        console.error('Microphone error:', err);
+        alert('माइक्रोफ़ोन एक्सेस की अनुमति दें!');
+      }
+    }
+  };
 
   const t = translations[language];
 
@@ -269,6 +339,20 @@ function CounterContent() {
               <div className="text-5xl md:text-6xl mb-2">🙏</div>
               <div>{t.tapToCount}</div>
             </div>
+          </button>
+
+          {/* Voice Counter Button */}
+          <button
+            onClick={toggleVoiceCounting}
+            className={`w-full py-4 md:py-6 rounded-xl md:rounded-2xl font-bold transition-all shadow-lg mb-4 ${
+              isListening
+                ? 'bg-gradient-to-br from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 animate-pulse'
+                : 'bg-gradient-to-br from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700'
+            } text-white`}
+          >
+            <div className="text-3xl md:text-4xl mb-2">{isListening ? '🎤' : '🎙️'}</div>
+            <div className="text-sm md:text-base">{isListening ? 'बोलें और गिनती बढ़ेगी' : 'वॉइस से गिनें'}</div>
+            {isListening && <div className="text-xs mt-1 opacity-75">हर बार बोलने पर +1</div>}
           </button>
 
           {/* Action Buttons */}
