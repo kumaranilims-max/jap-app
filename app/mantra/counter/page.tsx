@@ -122,7 +122,7 @@ function CounterContent() {
         checkVolume();
       } catch (err) {
         console.error('Microphone error:', err);
-        alert('माइक्रोफ़ोन एक्सेस की अनुमति दें!');
+        alert(t.micPermission);
       }
     }
   };
@@ -351,8 +351,8 @@ function CounterContent() {
             } text-white`}
           >
             <div className="text-3xl md:text-4xl mb-2">{isListening ? '🎤' : '🎙️'}</div>
-            <div className="text-sm md:text-base">{isListening ? 'बोलें और गिनती बढ़ेगी' : 'वॉइस से गिनें'}</div>
-            {isListening && <div className="text-xs mt-1 opacity-75">हर बार बोलने पर +1</div>}
+            <div className="text-sm md:text-base">{isListening ? t.voiceActive : t.voiceCount}</div>
+            {isListening && <div className="text-xs mt-1 opacity-75">{t.voiceHint}</div>}
           </button>
 
           {/* Action Buttons */}

@@ -34,7 +34,11 @@ export const translations = {
     enterGoal: "अपना लक्ष्य दर्ज करें",
     close: "बंद करें",
     back: "वापस",
-    logout: "लॉगआउट"
+    logout: "लॉगआउट",
+    voiceCount: "वॉइस से गिनें",
+    voiceActive: "बोलें और गिनती बढ़ेगी",
+    voiceHint: "हर बार बोलने पर +1",
+    micPermission: "माइक्रोफ़ोन एक्सेस की अनुमति दें!"
   },
   en: {
     // Home page
@@ -70,7 +74,11 @@ export const translations = {
     enterGoal: "Enter your goal",
     close: "Close",
     back: "Back",
-    logout: "Logout"
+    logout: "Logout",
+    voiceCount: "Voice Count",
+    voiceActive: "Speak to Count",
+    voiceHint: "Each time you speak +1",
+    micPermission: "Please allow microphone access!"
   }
 };
 
